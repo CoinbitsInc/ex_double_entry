@@ -110,8 +110,9 @@ Both functions return an `ExDoubleEntry.Account` struct that looks like this:
 
 There are two transfer modes, `transfer` and `transfer!`.
 
-Note: ExDoubleEntry relies on the [money](https://github.com/elixirmoney/money)
-library for balances and amounts.
+Note: ExDoubleEntry relies on either the
+[money](https://github.com/elixirmoney/money) or
+[ex_money](https://github.com/kipcole9/money) library for balances and amounts.
 
 ```elixir
 # accounts need to exist in the DB otherwise
