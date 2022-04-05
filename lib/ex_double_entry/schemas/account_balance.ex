@@ -5,17 +5,18 @@ defmodule ExDoubleEntry.AccountBalance do
   alias ExDoubleEntry.{Account, AccountBalance, EctoType}
 
   schema "#{ExDoubleEntry.db_table_prefix()}account_balances" do
-    field(:identifier, EctoType.Identifier)
-    field(:currency, EctoType.Currency)
-    field(:scope, EctoType.Scope)
-    field(:balance_amount, EctoType.Amount)
+    field :identifier, EctoType.Identifier
+    field :currency, EctoType.Currency
+    field :scope, EctoType.Scope
+    field :balance_amount, EctoType.Amount
+    field :metadata, :map
 
-    timestamps(type: :utc_datetime_usec)
+    timestamps type: :utc_datetime_usec
   end
 
   defp changeset(params) do
     %AccountBalance{}
-    |> cast(params, [:identifier, :currency, :scope, :balance_amount])
+    |> cast(params, [:identifier, :currency, :scope, :balance_amount, :metadata])
     |> validate_required([:identifier, :currency, :balance_amount])
     |> unique_constraint(:identifier, name: :scope_currency_identifier_index)
   end
@@ -24,12 +25,18 @@ defmodule ExDoubleEntry.AccountBalance do
     for_account(account, lock: false)
   end
 
-  def create!(%Account{identifier: identifier, currency: currency, scope: scope}) do
+  def create!(%Account{
+        identifier: identifier,
+        currency: currency,
+        scope: scope,
+        metadata: metadata
+      }) do
     %{
       identifier: identifier,
       currency: currency,
       scope: scope,
-      balance_amount: 0
+      balance_amount: 0,
+      metadata: metadata
     }
     |> changeset()
     |> ExDoubleEntry.repo().insert!()

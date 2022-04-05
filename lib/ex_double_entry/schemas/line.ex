@@ -5,20 +5,20 @@ defmodule ExDoubleEntry.Line do
   alias ExDoubleEntry.{AccountBalance, EctoType, Line, MoneyProxy}
 
   schema "#{ExDoubleEntry.db_table_prefix()}lines" do
-    field(:account_identifier, EctoType.Identifier)
-    field(:account_scope, EctoType.Scope)
-    field(:currency, EctoType.Currency)
-    field(:amount, EctoType.Amount)
-    field(:balance_amount, EctoType.Amount)
-    field(:code, EctoType.Identifier)
-    field(:partner_identifier, EctoType.Identifier)
-    field(:partner_scope, EctoType.Scope)
-    field(:metadata, :map)
+    field :account_identifier, EctoType.Identifier
+    field :account_scope, EctoType.Scope
+    field :currency, EctoType.Currency
+    field :amount, EctoType.Amount
+    field :balance_amount, EctoType.Amount
+    field :code, EctoType.Identifier
+    field :partner_identifier, EctoType.Identifier
+    field :partner_scope, EctoType.Scope
+    field :metadata, :map
 
-    belongs_to(:partner_line, Line)
-    belongs_to(:account_balance, AccountBalance)
+    belongs_to :partner_line, Line
+    belongs_to :account_balance, AccountBalance
 
-    timestamps(type: :utc_datetime_usec)
+    timestamps type: :utc_datetime_usec
   end
 
   defp changeset(params) do

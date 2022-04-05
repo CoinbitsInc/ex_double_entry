@@ -82,7 +82,10 @@ ExDoubleEntry.make_account!(
   #
   # due to DB index on `NULL` values, scope value can only be `nil` (stored as
   # an empty string in the DB) or non-empty strings
-  scope: "user/1"
+  scope: "user/1",
+  # optional, as a map, default is `nil`, useful for capturing account related
+  # data such as an external ID
+  metadata: %{"id" => "ABC-XYZ"}
 )
 
 # looks up an account with its balance
@@ -103,6 +106,7 @@ Both functions return an `ExDoubleEntry.Account` struct that looks like this:
   scope: "user/1",
   positive_only?: true,
   balance: Money.new(0, :USD),
+  metadata: %{"id" => "ABC-XYZ"}
 }
 ```
 
