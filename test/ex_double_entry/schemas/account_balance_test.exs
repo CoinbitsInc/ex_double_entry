@@ -8,10 +8,14 @@ defmodule ExDoubleEntry.AccountBalanceTest do
       identifier: :savings,
       scope: "user/1",
       currency: :USD,
-      balance: MoneyProxy.new(42, :USD)
+      balance: MoneyProxy.new(42, :USD),
+      metadata: %{"hello" => "world"}
     }
 
-    assert %AccountBalance{balance_amount: 0} = AccountBalance.create!(account)
+    assert %AccountBalance{
+             balance_amount: 0,
+             metadata: %{"hello" => "world"}
+           } = AccountBalance.create!(account)
 
     assert_raise(Ecto.InvalidChangesetError, fn ->
       AccountBalance.create!(account)
@@ -46,7 +50,8 @@ defmodule ExDoubleEntry.AccountBalanceTest do
                identifier: :savings,
                currency: :USD,
                scope: "user/1",
-               balance_amount: 42
+               balance_amount: 42,
+               metadata: nil
              } = ab
     end
 
@@ -93,7 +98,8 @@ defmodule ExDoubleEntry.AccountBalanceTest do
                identifier: :crypto,
                currency: :BTC,
                scope: nil,
-               balance_amount: 0
+               balance_amount: 0,
+               metadata: nil
              } = ab
     end
 

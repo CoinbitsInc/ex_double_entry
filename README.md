@@ -82,7 +82,10 @@ ExDoubleEntry.make_account!(
   #
   # due to DB index on `NULL` values, scope value can only be `nil` (stored as
   # an empty string in the DB) or non-empty strings
-  scope: "user/1"
+  scope: "user/1",
+  # optional, as a map, default is `nil`, useful for capturing account related
+  # data such as an external ID
+  metadata: %{"id" => "ABC-XYZ"}
 )
 
 # looks up an account with its balance
@@ -103,6 +106,7 @@ Both functions return an `ExDoubleEntry.Account` struct that looks like this:
   scope: "user/1",
   positive_only?: true,
   balance: Money.new(0, :USD),
+  metadata: %{"id" => "ABC-XYZ"}
 }
 ```
 
@@ -110,8 +114,9 @@ Both functions return an `ExDoubleEntry.Account` struct that looks like this:
 
 There are two transfer modes, `transfer` and `transfer!`.
 
-Note: ExDoubleEntry relies on the [money](https://github.com/elixirmoney/money)
-library for balances and amounts.
+Note: ExDoubleEntry relies on either the
+[money](https://github.com/elixirmoney/money) or
+[ex_money](https://github.com/kipcole9/money) library for balances and amounts.
 
 ```elixir
 # accounts need to exist in the DB otherwise

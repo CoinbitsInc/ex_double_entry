@@ -14,6 +14,7 @@ defmodule ExDoubleEntry.Repo.Migrations.ExDoubleEntryMoney do
       add :currency, :string, null: false
       add :scope, :string, null: false, default: ""
       add :balance_amount, :bigint, null: false
+      add :metadata, json_type
 
       timestamps(type: :utc_datetime_usec)
     end

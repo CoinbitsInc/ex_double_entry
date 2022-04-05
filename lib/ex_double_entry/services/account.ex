@@ -2,7 +2,7 @@ defmodule ExDoubleEntry.Account do
   @type t() :: %__MODULE__{}
 
   @enforce_keys [:identifier, :currency]
-  defstruct [:id, :identifier, :scope, :currency, :balance, :positive_only?]
+  defstruct [:id, :identifier, :scope, :currency, :balance, :positive_only?, :metadata]
 
   alias ExDoubleEntry.{Account, AccountBalance, MoneyProxy}
 
@@ -15,6 +15,7 @@ defmodule ExDoubleEntry.Account do
       currency: params.currency,
       scope: params.scope,
       positive_only?: positive_only?(params.identifier),
+      metadata: params.metadata,
       balance: MoneyProxy.new(params.balance_amount, params.currency)
     }
   end
@@ -33,7 +34,8 @@ defmodule ExDoubleEntry.Account do
       identifier: identifier,
       currency: currency(opts),
       scope: opts[:scope],
-      positive_only?: positive_only?(identifier)
+      positive_only?: positive_only?(identifier),
+      metadata: opts[:metadata]
     }
     |> AccountBalance.create!()
     |> present()

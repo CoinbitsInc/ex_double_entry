@@ -8,7 +8,13 @@ defmodule ExDoubleEntry.AccountTest do
 
     account =
       :account_balance
-      |> insert(identifier: :savings, currency: :USD, scope: "user/1", balance_amount: 42)
+      |> insert(
+        identifier: :savings,
+        currency: :USD,
+        scope: "user/1",
+        balance_amount: 42,
+        metadata: %{"hello" => "world"}
+      )
       |> Account.present()
 
     assert %Account{
@@ -16,20 +22,27 @@ defmodule ExDoubleEntry.AccountTest do
              currency: :USD,
              scope: "user/1",
              positive_only?: true,
-             balance: ^balance
+             balance: ^balance,
+             metadata: %{"hello" => "world"}
            } = account
   end
 
   describe "lookup!/2" do
     test "found" do
-      insert(:account_balance, identifier: :savings, currency: :USD, balance_amount: 42)
+      insert(:account_balance,
+        identifier: :savings,
+        currency: :USD,
+        balance_amount: 42,
+        metadata: %{"hello" => "world"}
+      )
 
       balance = MoneyProxy.new(42, :USD)
 
       assert %Account{
                identifier: :savings,
                currency: :USD,
-               balance: ^balance
+               balance: ^balance,
+               metadata: %{"hello" => "world"}
              } = Account.lookup!(:savings, currency: :USD)
     end
 
@@ -41,7 +54,8 @@ defmodule ExDoubleEntry.AccountTest do
       assert %Account{
                identifier: :savings,
                currency: :USD,
-               balance: ^balance
+               balance: ^balance,
+               metadata: nil
              } = Account.lookup!(:savings)
     end
 
