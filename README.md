@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/coinjar/ex_double_entry/actions/workflows/ci.yml/badge.svg)](https://github.com/coinjar/ex_double_entry/actions)
 
-An Elixir double-entry library inspired by Ruby's [DoubleEntry](https://github.com/envato/double_entry). Brought to you by [CoinJar](https://coinjar.com).
+An Elixir double-entry library inspired by Ruby's [DoubleEntry](https://github.com/envato/double_entry).
 
 ![](https://i.imgur.com/QqrlYZ9.png)
 
@@ -16,7 +16,7 @@ An Elixir double-entry library inspired by Ruby's [DoubleEntry](https://github.c
 ```elixir
 def deps do
   [
-    {:ex_double_entry, github: "coinjar/ex_double_entry"},
+    {:ex_double_entry, github: "CoinbitsInc/ex_double_entry"},
     # pick one DB package
     {:postgrex, ">= 0.0.0"},
     {:myxql, ">= 0.0.0"},
@@ -170,3 +170,8 @@ end)
 ## License
 
 Licensed under [MIT](LICENSE.md).
+
+## Sponsors
+
+- [CoinJar](https://coinjar.com)
+- [Coinbits](https://coinbits.com)
