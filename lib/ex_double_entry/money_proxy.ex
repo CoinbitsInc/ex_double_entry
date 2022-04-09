@@ -7,6 +7,8 @@ defmodule ExDoubleEntry.MoneyProxy do
 
   defdelegate new(amount, currency), to: Money
 
+  defdelegate positive?(money), to: Money
+
   def add(a, b) do
     if function_exported?(Money, :add!, 2) do
       apply(Money, :add!, [a, b])
@@ -36,14 +38,6 @@ defmodule ExDoubleEntry.MoneyProxy do
       apply(Money, :neg, [money])
     else
       apply(Money, :mult!, [money, -1])
-    end
-  end
-
-  def positive?(money) do
-    if function_exported?(Money, :positive?, 1) do
-      apply(Money, :positive?, [money])
-    else
-      apply(Money, :cmp!, [money, Money.new(0, money.currency)]) >= 0
     end
   end
 end

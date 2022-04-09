@@ -34,7 +34,7 @@ defmodule ExDoubleEntry.MixProject do
     [
       {:jason, "~> 1.2"},
       {:money, "~> 1.9", only: [:test_money, :test_mysql_money]},
-      {:ex_money, "~> 5.9", only: [:test_ex_money, :test_mysql_ex_money]},
+      {:ex_money, "~> 5.10", only: [:test_ex_money, :test_mysql_ex_money]},
       {:ecto_sql, "~> 3.7"},
       {:postgrex, ">= 0.0.0", optional: true},
       {:myxql, ">= 0.0.0", optional: true},
