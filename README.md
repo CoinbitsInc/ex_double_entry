@@ -56,10 +56,11 @@ config :ex_double_entry,
     # for each transfer pair:
     #   - the first element is the source account
     #   - the second element is the destination account
+    #   - an optional third element to specify whether the transfer is reversible
     deposit: [
       {:bank, :savings},
       {:bank, :checking},
-      {:checking, :savings},
+      {:checking, :savings, reversible: true},
     ],
     withdraw: [
       {:savings, :checking},
@@ -132,6 +133,7 @@ ExDoubleEntry.transfer(
   # as either a JSON string (MySQL) or a JSONB object (Postgres)
   metadata: %{diamond: "hands"}
 )
+# => {:ok, %ExDoubleEntry.Transfer{...}}
 
 # accounts will be created in the DB if they don't exist
 # once accounts are created they will be locked during the transfer
@@ -141,6 +143,58 @@ ExDoubleEntry.transfer!(
   to: account_b,
   code: :deposit
 )
+# => {:ok, %ExDoubleEntry.Transfer{...}}
+
+# it can be performed on the `Transfer` struct too
+%ExDoubleEntry.Transfer{
+  money: Money.new(100_00, :USD),
+  from: account_a,
+  to: account_b,
+  code: :deposit
+}
+|> ExDoubleEntry.transfer!()
+```
+
+In both modes, a tuple of containing the `%ExDoubleEntry.Transfer{}` struct gets
+returned.
+
+### Reversals
+
+A reversal is intended to be used when a transfer has occurred, then later on it
+needs to be reversed. Therefore, a reversal only works when the accounts exist
+(i.e. the reversal will fail if either account doesn't exist).
+
+A reversal is only permitted when the transfer is configured for it, see the
+[Configuration](#configuration) section. A reversal's line items will be created
+using the `:"#{code}_reversal"` transfer code, e.g. `:deposit` becomes
+`:deposit_reversal`.
+
+The `from` and `to` needs to be specified in the transfer's original order. For
+instance, to reverse a transfer that was a deposit from `account_a` to
+`account_b`, the `from` and `to` remains as `from: account_a` and
+`to: account_b`.
+
+Bear in mind that a reversal is a convenience function, it is performed
+independently to the original transfer and does not have any link to the
+original transfer.
+
+```elixir
+ExDoubleEntry.reverse(
+  money: Money.new(100_00, :USD),
+  from: account_a,
+  to: account_b,
+  code: :deposit
+)
+# => {:ok, %ExDoubleEntry.Transfer{...}}
+
+%ExDoubleEntry.Transfer{
+  money: Money.new(100_00, :USD),
+  from: account_a,
+  to: account_b,
+  code: :deposit
+}
+|> ExDoubleEntry.reverse()
+# => {:ok, %ExDoubleEntry.Transfer{...}}
 ```
 
 ### Locking

@@ -15,7 +15,7 @@ config :ex_double_entry,
     deposit: [
       {:bank, :savings},
       {:bank, :checking},
-      {:checking, :savings}
+      {:checking, :savings, reversible: true}
     ],
     withdraw: [
       {:savings, :checking}

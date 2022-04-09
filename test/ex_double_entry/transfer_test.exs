@@ -18,7 +18,20 @@ defmodule ExDoubleEntry.TransferTest do
   end
 
   describe "perform!/1" do
-    test "successful", %{acc_a: acc_a, acc_b: acc_b} do
+    test "successful on params", %{acc_a: acc_a, acc_b: acc_b} do
+      transfer =
+        Transfer.perform!(
+          money: MoneyProxy.new(123_45, :USD),
+          from: acc_a,
+          to: acc_b,
+          code: :deposit
+        )
+
+      assert {:ok, %Transfer{}} = transfer
+      assert Line |> ExDoubleEntry.repo().all() |> Enum.count() == 2
+    end
+
+    test "successful on struct", %{acc_a: acc_a, acc_b: acc_b} do
       transfer =
         Transfer.perform!(%Transfer{
           money: MoneyProxy.new(123_45, :USD),

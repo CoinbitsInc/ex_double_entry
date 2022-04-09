@@ -49,4 +49,6 @@ defmodule ExDoubleEntry do
   def transfer(transfer) do
     ExDoubleEntry.Transfer.perform!(transfer, ensure_accounts: false)
   end
+
+  defdelegate reverse(transfer), to: ExDoubleEntry.Reversal, as: :perform!
 end

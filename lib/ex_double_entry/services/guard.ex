@@ -24,11 +24,96 @@ defmodule ExDoubleEntry.Guard do
 
   iex> %Transfer{
   iex>   money: nil,
+  iex>   from: %Account{identifier: :savings, currency: :USD},
+  iex>   to: %Account{identifier: :checking, currency: :USD},
+  iex>   code: :deposit_reversal
+  iex> }
+  iex> |> Guard.valid_definition?()
+  {
+    :ok,
+    %Transfer{
+      money: nil,
+      code: :deposit,
+      from: %Account{identifier: :checking, currency: :USD},
+      to: %Account{identifier: :savings, currency: :USD},
+    }
+  }
+
+  iex> %Transfer{
+  iex>   money: nil,
+  iex>   from: %Account{identifier: :savings, currency: :USD},
+  iex>   to: %Account{identifier: :checking, currency: :USD},
+  iex>   code: :give_away_reversal
+  iex> }
+  iex> |> Guard.valid_definition?()
+  {:error, :undefined_transfer_code, "Transfer code :give_away is undefined."}
+
+  iex> %Transfer{
+  iex>   money: nil,
+  iex>   from: %Account{identifier: :savings, currency: :USD},
+  iex>   to: %Account{identifier: :bank, currency: :USD},
+  iex>   code: :deposit_reversal
+  iex> }
+  iex> |> Guard.valid_definition?()
+  {:error, :undefined_transfer_pair, "Transfer pair :bank -> :savings does not exist for code :deposit_reversal."}
+
+  iex> %Transfer{
+  iex>   money: nil,
+  iex>   from: %Account{identifier: :checking, currency: :USD},
+  iex>   to: %Account{identifier: :savings, currency: :USD},
+  iex>   code: :withdraw_reversal
+  iex> }
+  iex> |> Guard.valid_definition?()
+  {:error, :undefined_transfer_pair, "Transfer pair :savings -> :checking does not exist for code :withdraw_reversal."}
+  """
+  def valid_definition?(%Transfer{from: from, to: to, code: code} = transfer) do
+    case String.ends_with?("#{code}", "_reversal") do
+      true ->
+        valid_definition?(
+          %Transfer{
+            transfer
+            | from: to,
+              to: from,
+              code:
+                "#{code}"
+                |> String.replace_suffix("_reversal", "")
+                |> String.to_atom()
+          },
+          true
+        )
+
+      false ->
+        valid_definition?(transfer, false)
+    end
+  end
+
+  @doc """
+  ## Examples
+
+  iex> %Transfer{
+  iex>   money: nil,
   iex>   from: %Account{identifier: :checking, currency: :USD},
   iex>   to: %Account{identifier: :savings, currency: :USD},
   iex>   code: :deposit
   iex> }
   iex> |> Guard.valid_definition?()
+  {
+    :ok,
+    %Transfer{
+      money: nil,
+      code: :deposit,
+      from: %Account{identifier: :checking, currency: :USD},
+      to: %Account{identifier: :savings, currency: :USD},
+    }
+  }
+
+  iex> %Transfer{
+  iex>   money: nil,
+  iex>   from: %Account{identifier: :checking, currency: :USD},
+  iex>   to: %Account{identifier: :savings, currency: :USD},
+  iex>   code: :deposit
+  iex> }
+  iex> |> Guard.valid_definition?(true)
   {
     :ok,
     %Transfer{
@@ -55,22 +140,56 @@ defmodule ExDoubleEntry.Guard do
   iex>   code: :withdraw
   iex> }
   iex> |> Guard.valid_definition?()
-  {:error, :undefined_transfer_pair, "Transfer pair :checking -> :savings does not exist for code withdraw."}
+  {:error, :undefined_transfer_pair, "Transfer pair :checking -> :savings does not exist for code :withdraw."}
   """
-  def valid_definition?(%Transfer{from: from, to: to, code: code} = transfer) do
+  def valid_definition?(
+        %Transfer{from: from, to: to, code: code} = transfer,
+        is_reversal
+      ) do
     with {:ok, pairs} <-
            :ex_double_entry
            |> Application.fetch_env!(:transfers)
            |> Map.fetch(code),
-         true <- Enum.member?(pairs, {from.identifier, to.identifier}) do
+         true <-
+           pairs
+           |> Enum.find(fn pair ->
+             accounts_match =
+               [from.identifier, to.identifier] ==
+                 pair
+                 |> Tuple.to_list()
+                 |> Enum.take(2)
+
+             reversal_match =
+               if is_reversal do
+                 case pair do
+                   {_to, _from, opts} ->
+                     Keyword.take(opts, [:reversible]) == [reversible: true]
+
+                   {_to, _from} ->
+                     false
+                 end
+               else
+                 true
+               end
+
+             accounts_match and reversal_match
+           end)
+           |> Kernel.!=(nil) do
       {:ok, transfer}
     else
       :error ->
         {:error, :undefined_transfer_code, "Transfer code :#{code} is undefined."}
 
       false ->
+        code =
+          if is_reversal do
+            :"#{code}_reversal"
+          else
+            code
+          end
+
         {:error, :undefined_transfer_pair,
-         "Transfer pair :#{from.identifier} -> :#{to.identifier} does not exist for code #{code}."}
+         "Transfer pair :#{from.identifier} -> :#{to.identifier} does not exist for code :#{code}."}
     end
   end
 
