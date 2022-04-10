@@ -141,7 +141,33 @@ defmodule ExDoubleEntry.Guard do
   iex> }
   iex> |> Guard.valid_definition?()
   {:error, :undefined_transfer_pair, "Transfer pair :checking -> :savings does not exist for code :withdraw."}
+
+  iex> %Transfer{
+  iex>   money: nil,
+  iex>   from: nil,
+  iex>   to: %Account{identifier: :savings, currency: :USD},
+  iex>   code: :withdraw
+  iex> }
+  iex> |> Guard.valid_definition?()
+  {:error, :missing_from_account, "Transfer must have a from account."}
+
+  iex> %Transfer{
+  iex>   money: nil,
+  iex>   from: %Account{identifier: :checking, currency: :USD},
+  iex>   to: nil,
+  iex>   code: :withdraw
+  iex> }
+  iex> |> Guard.valid_definition?()
+  {:error, :missing_to_account, "Transfer must have a to account."}
   """
+  def valid_definition?(%Transfer{from: nil}, _is_reversal) do
+    {:error, :missing_from_account, "Transfer must have a from account."}
+  end
+
+  def valid_definition?(%Transfer{to: nil}, _is_reversal) do
+    {:error, :missing_to_account, "Transfer must have a to account."}
+  end
+
   def valid_definition?(
         %Transfer{from: from, to: to, code: code} = transfer,
         is_reversal
