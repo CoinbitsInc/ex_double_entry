@@ -119,6 +119,18 @@ Note: ExDoubleEntry relies on either the
 [money](https://github.com/elixirmoney/money) or
 [ex_money](https://github.com/kipcole9/money) library for balances and amounts.
 
+`money` and `ex_money` uses different notations for amounts, `money` only
+supports integer values to represents the smallest unit of the currency (e.g.
+cents), whereas `ex_money` can use string or decimal values to represent the
+money value.
+
+ExDoubleEntry uses decimal to store the values in the database, however it does
+not convert the values, so for `ex_money`, what you can is what you get, but for
+`money` the stored decimal values are all integers.
+
+So, for the amount `100.23` USD, `money` stores it as `10023` whereas `ex_money`
+stores it as `100.23`.
+
 ```elixir
 # accounts need to exist in the DB otherwise
 # `ExDoubleEntry.Account.NotFoundError` is raised

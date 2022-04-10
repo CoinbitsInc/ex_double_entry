@@ -73,20 +73,25 @@ defmodule ExDoubleEntry.TransferTest do
     [line1_id, line2_id] = [line1.id, line2.id]
     [acc_a_id, acc_b_id] = [acc_a.id, acc_b.id]
 
+    amount = Decimal.new(123_45)
+    amount_neg = Decimal.new(-123_45)
+    balance1 = Decimal.new(76_55)
+    balance2 = Decimal.new(323_45)
+
     assert %AccountBalance{
-             balance_amount: 76_55
+             balance_amount: ^balance1
            } = AccountBalance.for_account(acc_a)
 
     assert %AccountBalance{
-             balance_amount: 323_45
+             balance_amount: ^balance2
            } = AccountBalance.for_account(acc_b)
 
     assert %Line{
              account_identifier: :checking,
              account_scope: nil,
              currency: :USD,
-             amount: -123_45,
-             balance_amount: 76_55,
+             amount: ^amount_neg,
+             balance_amount: ^balance1,
              code: :deposit,
              partner_identifier: :savings,
              partner_scope: nil,
@@ -99,8 +104,8 @@ defmodule ExDoubleEntry.TransferTest do
              account_identifier: :savings,
              account_scope: nil,
              currency: :USD,
-             amount: 123_45,
-             balance_amount: 323_45,
+             amount: ^amount,
+             balance_amount: ^balance2,
              code: :deposit,
              partner_identifier: :checking,
              partner_scope: nil,

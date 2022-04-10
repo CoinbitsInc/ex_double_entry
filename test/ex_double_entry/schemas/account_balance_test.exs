@@ -12,8 +12,10 @@ defmodule ExDoubleEntry.AccountBalanceTest do
       metadata: %{"hello" => "world"}
     }
 
+    amount = Decimal.new(0)
+
     assert %AccountBalance{
-             balance_amount: 0,
+             balance_amount: ^amount,
              metadata: %{"hello" => "world"}
            } = AccountBalance.create!(account)
 
@@ -46,11 +48,13 @@ defmodule ExDoubleEntry.AccountBalanceTest do
           scope: "user/1"
         })
 
+      amount = Decimal.new(42)
+
       assert %AccountBalance{
                identifier: :savings,
                currency: :USD,
                scope: "user/1",
-               balance_amount: 42,
+               balance_amount: ^amount,
                metadata: nil
              } = ab
     end
@@ -62,11 +66,13 @@ defmodule ExDoubleEntry.AccountBalanceTest do
           currency: :AUD
         })
 
+      amount = Decimal.new(1337)
+
       assert %AccountBalance{
                identifier: :savings,
                currency: :AUD,
                scope: nil,
-               balance_amount: 1337
+               balance_amount: ^amount
              } = ab
     end
 
@@ -77,11 +83,13 @@ defmodule ExDoubleEntry.AccountBalanceTest do
           currency: :AUD
         })
 
+      amount = Decimal.new(233)
+
       assert %AccountBalance{
                identifier: :checking,
                currency: :AUD,
                scope: nil,
-               balance_amount: 233
+               balance_amount: ^amount
              } = ab
     end
   end
@@ -94,11 +102,13 @@ defmodule ExDoubleEntry.AccountBalanceTest do
           currency: :BTC
         })
 
+      amount = Decimal.new(0)
+
       assert %AccountBalance{
                identifier: :crypto,
                currency: :BTC,
                scope: nil,
-               balance_amount: 0,
+               balance_amount: ^amount,
                metadata: nil
              } = ab
     end

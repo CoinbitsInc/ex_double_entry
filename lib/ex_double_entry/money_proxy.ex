@@ -5,12 +5,35 @@ defmodule ExDoubleEntry.MoneyProxy do
   can be used by either.
   """
 
-  defdelegate new(amount, currency), to: Money
+  require Decimal
+
+  def is_ex_money? do
+    function_exported?(Money, :to_string!, 2)
+  end
+
+  def is_money? do
+    !is_ex_money?()
+  end
 
   defdelegate positive?(money), to: Money
 
+  def new(amount, currency) do
+    if is_ex_money?() do
+      apply(Money, :new, [amount, currency])
+    else
+      amount =
+        if Decimal.is_decimal(amount) do
+          Decimal.to_integer(amount)
+        else
+          amount
+        end
+
+      apply(Money, :new, [amount, currency])
+    end
+  end
+
   def add(a, b) do
-    if function_exported?(Money, :add!, 2) do
+    if is_ex_money?() do
       apply(Money, :add!, [a, b])
     else
       apply(Money, :add, [a, b])
@@ -18,7 +41,7 @@ defmodule ExDoubleEntry.MoneyProxy do
   end
 
   def subtract(a, b) do
-    if function_exported?(Money, :sub!, 2) do
+    if is_ex_money?() do
       apply(Money, :sub!, [a, b])
     else
       apply(Money, :subtract, [a, b])
@@ -26,7 +49,7 @@ defmodule ExDoubleEntry.MoneyProxy do
   end
 
   def cmp(a, b) do
-    if function_exported?(Money, :compare!, 2) do
+    if is_ex_money?() do
       apply(Money, :compare!, [a, b])
     else
       apply(Money, :cmp, [a, b])
@@ -34,10 +57,10 @@ defmodule ExDoubleEntry.MoneyProxy do
   end
 
   def neg(money) do
-    if function_exported?(Money, :neg, 1) do
-      apply(Money, :neg, [money])
-    else
+    if is_ex_money?() do
       apply(Money, :mult!, [money, -1])
+    else
+      apply(Money, :neg, [money])
     end
   end
 end

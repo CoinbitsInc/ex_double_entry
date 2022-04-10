@@ -13,26 +13,29 @@ defmodule ExDoubleEntryStressTest do
     transfers_config = Application.fetch_env!(:ex_double_entry, :transfers)
 
     {new_accounts_config, new_transfer_config} =
-      Enum.reduce(1..@account_pairs_per_process, {accounts_config, transfers_config}, fn n,
-                                                                                         {ac, tc} ->
-        acc_a_identifier = :"acc-#{n}-a"
-        acc_b_identifier = :"acc-#{n}-b"
+      Enum.reduce(
+        1..@account_pairs_per_process,
+        {accounts_config, transfers_config},
+        fn n, {ac, tc} ->
+          acc_a_identifier = :"acc-#{n}-a"
+          acc_b_identifier = :"acc-#{n}-b"
 
-        merged_accounts_config =
-          Map.merge(ac, %{
-            acc_a_identifier => [],
-            acc_b_identifier => []
-          })
+          merged_accounts_config =
+            Map.merge(ac, %{
+              acc_a_identifier => [],
+              acc_b_identifier => []
+            })
 
-        transfers_config_items = tc[:stress_test] ++ [{acc_a_identifier, acc_b_identifier}]
+          transfers_config_items = tc[:stress_test] ++ [{acc_a_identifier, acc_b_identifier}]
 
-        merged_transfers_config =
-          Map.merge(tc, %{
-            stress_test: transfers_config_items
-          })
+          merged_transfers_config =
+            Map.merge(tc, %{
+              stress_test: transfers_config_items
+            })
 
-        {merged_accounts_config, merged_transfers_config}
-      end)
+          {merged_accounts_config, merged_transfers_config}
+        end
+      )
 
     Application.put_env(:ex_double_entry, :accounts, new_accounts_config)
     Application.put_env(:ex_double_entry, :transfers, new_transfer_config)
@@ -62,86 +65,101 @@ defmodule ExDoubleEntryStressTest do
                 end
 
               {amount_aa, amount_bb} =
-                Enum.reduce(1..@transfers_per_account, {0, 0}, fn _, {a, b} ->
-                  amount = :rand.uniform(1_000_00)
+                Enum.reduce(
+                  1..@transfers_per_account,
+                  {Decimal.new(0), Decimal.new(0)},
+                  fn _, {a, b} ->
+                    amount = :rand.uniform(1_000_00)
 
-                  {:ok, {amount_a, amount_b}} =
-                    lock_accounts([acc_a, acc_b], fn ->
-                      {:ok, _} =
-                        transfer!(
-                          money: MoneyProxy.new(amount, :USD),
-                          from: acc_a,
-                          to: acc_b,
-                          code: :stress_test
-                        )
+                    {:ok, {amount_a, amount_b}} =
+                      lock_accounts([acc_a, acc_b], fn ->
+                        {:ok, _} =
+                          transfer!(
+                            money: MoneyProxy.new(amount, :USD),
+                            from: acc_a,
+                            to: acc_b,
+                            code: :stress_test
+                          )
 
-                      amount_a = -amount
-                      amount_b = amount
+                        amount_a = Decimal.new(-amount)
+                        amount_b = Decimal.new(amount)
 
-                      scope_cond = fn query, value ->
-                        case value do
-                          nil ->
-                            query
-                            |> where([q], is_nil(q.account_scope))
-                            |> where([q], is_nil(q.partner_scope))
+                        scope_cond = fn query, value ->
+                          case value do
+                            nil ->
+                              query
+                              |> where([q], is_nil(q.account_scope))
+                              |> where([q], is_nil(q.partner_scope))
 
-                          _ ->
-                            query
-                            |> where([q], q.account_scope == ^value)
-                            |> where([q], q.partner_scope == ^value)
+                            _ ->
+                              query
+                              |> where([q], q.account_scope == ^value)
+                              |> where([q], q.partner_scope == ^value)
+                          end
                         end
-                      end
 
-                      lines_a =
-                        from(
-                          l in Line,
-                          where: l.account_identifier == ^acc_a_identifier,
-                          where: l.partner_identifier == ^acc_b_identifier,
-                          where: l.code == :stress_test,
-                          order_by: [desc: l.balance_amount]
-                        )
-                        |> scope_cond.(scope)
-                        |> ExDoubleEntry.repo().all()
+                        lines_a =
+                          from(
+                            l in Line,
+                            where: l.account_identifier == ^acc_a_identifier,
+                            where: l.partner_identifier == ^acc_b_identifier,
+                            where: l.code == :stress_test,
+                            order_by: [desc: l.balance_amount]
+                          )
+                          |> scope_cond.(scope)
+                          |> ExDoubleEntry.repo().all()
 
-                      lines_b =
-                        from(
-                          l in Line,
-                          where: l.account_identifier == ^acc_b_identifier,
-                          where: l.partner_identifier == ^acc_a_identifier,
-                          where: l.code == :stress_test,
-                          order_by: [asc: l.balance_amount]
-                        )
-                        |> scope_cond.(scope)
-                        |> ExDoubleEntry.repo().all()
+                        lines_b =
+                          from(
+                            l in Line,
+                            where: l.account_identifier == ^acc_b_identifier,
+                            where: l.partner_identifier == ^acc_a_identifier,
+                            where: l.code == :stress_test,
+                            order_by: [asc: l.balance_amount]
+                          )
+                          |> scope_cond.(scope)
+                          |> ExDoubleEntry.repo().all()
 
-                      {lines_a_amount, lines_a_balance_amount} =
-                        Enum.reduce(lines_a, {0, 0}, fn line, {amount, _ba} ->
-                          {amount + line.amount, line.balance_amount}
-                        end)
+                        {lines_a_amount, lines_a_balance_amount} =
+                          Enum.reduce(
+                            lines_a,
+                            {Decimal.new(0), Decimal.new(0)},
+                            fn line, {amount, _ba} ->
+                              {Decimal.add(amount, line.amount), line.balance_amount}
+                            end
+                          )
 
-                      assert lines_a_amount == lines_a_balance_amount
+                        assert lines_a_amount == lines_a_balance_amount
 
-                      {lines_b_amount, lines_b_balance_amount} =
-                        Enum.reduce(lines_b, {0, 0}, fn line, {amount, _ba} ->
-                          {amount + line.amount, line.balance_amount}
-                        end)
+                        {lines_b_amount, lines_b_balance_amount} =
+                          Enum.reduce(
+                            lines_b,
+                            {Decimal.new(0), Decimal.new(0)},
+                            fn line, {amount, _ba} ->
+                              {Decimal.add(amount, line.amount), line.balance_amount}
+                            end
+                          )
 
-                      assert lines_b_amount == lines_b_balance_amount
+                        assert lines_b_amount == lines_b_balance_amount
 
-                      assert lines_a_balance_amount + lines_b_balance_amount == 0
+                        assert Decimal.add(
+                                 lines_a_balance_amount,
+                                 lines_b_balance_amount
+                               ) == Decimal.new(0)
 
-                      {a + amount_a, b + amount_b}
-                    end)
+                        {Decimal.add(a, amount_a), Decimal.add(b, amount_b)}
+                      end)
 
-                  {amount_a, amount_b}
-                end)
+                    {amount_a, amount_b}
+                  end
+                )
 
               IO.write(".")
 
-              {aa + amount_aa, bb + amount_bb}
+              {Decimal.add(aa, amount_aa), Decimal.add(bb, amount_bb)}
             end)
 
-          assert amount_out + amount_in == 0
+          assert Decimal.add(amount_out, amount_in) == Decimal.new(0)
         end)
       end
 

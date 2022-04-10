@@ -6,16 +6,16 @@ if Code.ensure_loaded?(Ecto.Type) do
       @behaviour Ecto.Type
     end
 
-    def type, do: :integer
+    def type, do: :decimal
 
-    def cast(val) when is_integer(val), do: {:ok, val}
-    def cast(%Decimal{} = val), do: {:ok, Decimal.to_integer(val)}
+    def cast(val) when is_binary(val), do: {:ok, Decimal.new(val)}
+    def cast(val) when is_integer(val), do: {:ok, Decimal.new(val)}
+    def cast(val) when is_float(val), do: {:ok, Decimal.from_float(val)}
+    def cast(%Decimal{} = val), do: {:ok, val}
     def cast(_), do: :error
 
-    def load(val) when is_integer(val), do: {:ok, val}
+    def load(%Decimal{} = val), do: {:ok, val}
 
-    def dump(val) when is_integer(val), do: {:ok, val}
-    def dump(%Decimal{} = val), do: {:ok, Decimal.to_integer(val)}
-    def dump(_), do: :error
+    def dump(val), do: cast(val)
   end
 end

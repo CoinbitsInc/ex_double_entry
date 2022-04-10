@@ -16,3 +16,6 @@ config :ex_double_entry, ExDoubleEntry.Repo,
   queue_interval: 10
 
 config :logger, level: :info
+
+config :ex_money,
+  default_cldr_backend: ExDoubleEntry.Cldr

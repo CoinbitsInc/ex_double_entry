@@ -13,7 +13,7 @@ defmodule ExDoubleEntry.Repo.Migrations.ExDoubleEntryMoney do
       add :identifier, :string, null: false
       add :currency, :string, null: false
       add :scope, :string, null: false, default: ""
-      add :balance_amount, :bigint, null: false
+      add :balance_amount, :decimal, null: false
       add :metadata, json_type
 
       timestamps(type: :utc_datetime_usec)
@@ -25,8 +25,8 @@ defmodule ExDoubleEntry.Repo.Migrations.ExDoubleEntryMoney do
       add :account_identifier, :string, null: false
       add :account_scope, :string, null: false, default: ""
       add :currency, :string, null: false
-      add :amount, :bigint, null: false
-      add :balance_amount, :bigint, null: false
+      add :amount, :decimal, null: false
+      add :balance_amount, :decimal, null: false
       add :code, :string, null: false
       add :partner_identifier, :string, null: false
       add :partner_scope, :string, null: false, default: ""
