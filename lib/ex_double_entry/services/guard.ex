@@ -10,12 +10,22 @@ defmodule ExDoubleEntry.Guard do
 
   iex> %Transfer{money: MoneyProxy.new(-42, :USD), from: nil, to: nil, code: nil}
   iex> |> Guard.positive_amount?()
-  {:error, :positive_amount_only, ""}
+  {
+    :error,
+    :positive_amount_only,
+    %ExDoubleEntry.Transfer{
+      code: nil,
+      from: nil,
+      metadata: nil,
+      money: Money.new(:USD, "-42"),
+      to: nil
+    }
+  }
   """
   def positive_amount?(%Transfer{money: money} = transfer) do
     case MoneyProxy.positive?(money) do
       true -> {:ok, transfer}
-      false -> {:error, :positive_amount_only, ""}
+      false -> {:error, :positive_amount_only, transfer}
     end
   end
 
