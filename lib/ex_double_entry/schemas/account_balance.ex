@@ -4,6 +4,7 @@ defmodule ExDoubleEntry.AccountBalance do
 
   alias ExDoubleEntry.{Account, AccountBalance, EctoType}
 
+  @schema_prefix ExDoubleEntry.db_schema()
   schema "#{ExDoubleEntry.db_table_prefix()}account_balances" do
     field :identifier, EctoType.Identifier
     field :currency, EctoType.Currency

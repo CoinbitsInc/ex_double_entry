@@ -1,9 +1,17 @@
 defmodule ExDoubleEntry do
+  @db_schema Application.fetch_env!(:ex_double_entry, :db_schema)
   @db_table_prefix Application.fetch_env!(:ex_double_entry, :db_table_prefix)
   @repo Application.fetch_env!(:ex_double_entry, :repo)
 
-  def db_table_prefix, do: @db_table_prefix
+  def db_schema do
+    if ExDoubleEntry.Repo.__adapter__() == Ecto.Adapters.Postgres do
+      @db_schema
+    else
+      nil
+    end
+  end
 
+  def db_table_prefix, do: @db_table_prefix
   def repo, do: @repo
 
   @doc """

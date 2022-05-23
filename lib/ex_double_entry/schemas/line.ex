@@ -4,6 +4,7 @@ defmodule ExDoubleEntry.Line do
 
   alias ExDoubleEntry.{AccountBalance, EctoType, Line, MoneyProxy}
 
+  @schema_prefix ExDoubleEntry.db_schema()
   schema "#{ExDoubleEntry.db_table_prefix()}lines" do
     field :account_identifier, EctoType.Identifier
     field :account_scope, EctoType.Scope
