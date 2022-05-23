@@ -1,55 +1,13 @@
 name: CI
 on: [push, pull_request]
-env:
-  otp-23: 23.3
-  otp-24: 24.3
-  otp-25: 25.0
-  elixir: 1.13.4
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-25 }}
-            env: test_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-25 }}
-            env: test_mysql_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-25 }}
-            env: test_ex_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-25 }}
-            env: test_mysql_ex_money
-
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-24 }}
-            env: test_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-24 }}
-            env: test_mysql_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-24 }}
-            env: test_ex_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-24 }}
-            env: test_mysql_ex_money
-
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-23 }}
-            env: test_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-23 }}
-            env: test_mysql_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-23 }}
-            env: test_ex_money
-          - elixir: ${{ env.elixir }}
-            otp: ${{ env.otp-23 }}
-            env: test_mysql_ex_money
+        otp: [23.3, 24.3, 25.0]
+        elixir: [1.13.4]
+        env: [test_money, test_mysql_money, test_ex_money, test_mysql_ex_money]
 
     services:
       postgres:
