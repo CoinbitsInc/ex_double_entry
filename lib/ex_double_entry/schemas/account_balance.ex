@@ -1,5 +1,8 @@
 defmodule ExDoubleEntry.AccountBalance do
+  require Logger
+
   use Ecto.Schema
+
   import Ecto.{Changeset, Query}
 
   alias ExDoubleEntry.{Account, AccountBalance, EctoType}
@@ -69,6 +72,17 @@ defmodule ExDoubleEntry.AccountBalance do
     |> scope_cond(scope)
     |> lock_cond(lock)
     |> ExDoubleEntry.repo().one()
+    |> case do
+      nil ->
+        Logger.debug(
+          "Account not found with identifier: #{identifier}, currency: #{currency} and scope: #{scope}."
+        )
+
+        nil
+
+      acc ->
+        acc
+    end
   end
 
   defp scope_cond(query, scope) do

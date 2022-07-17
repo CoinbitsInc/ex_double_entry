@@ -44,6 +44,23 @@ defmodule ExDoubleEntryTest do
 
       assert Line |> ExDoubleEntry.repo().all() |> Enum.count() == 0
     end
+
+    test "zero amount transfer", %{acc_a: acc_a, acc_b: acc_b} do
+      result =
+        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn ->
+          ExDoubleEntry.transfer!(
+            money: MoneyProxy.new(0, :USD),
+            from: acc_a,
+            to: acc_b,
+            code: :deposit
+          )
+
+          :diamond_hands
+        end)
+
+      assert result == {:ok, :diamond_hands}
+      assert Line |> ExDoubleEntry.repo().all() |> Enum.count() == 2
+    end
   end
 
   describe "no persisted accounts" do

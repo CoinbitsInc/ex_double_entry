@@ -16,6 +16,7 @@ defmodule ExDoubleEntry.MoneyProxy do
   end
 
   defdelegate positive?(money), to: Money
+  defdelegate zero?(money), to: Money
 
   def new(amount, currency) do
     if is_ex_money?() do

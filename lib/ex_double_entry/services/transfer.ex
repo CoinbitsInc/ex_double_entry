@@ -1,4 +1,6 @@
 defmodule ExDoubleEntry.Transfer do
+  require Logger
+
   @type t() :: %__MODULE__{}
 
   @enforce_keys [:money, :from, :to, :code]
@@ -41,6 +43,8 @@ defmodule ExDoubleEntry.Transfer do
         } = transfer,
         ensure_accounts: ensure_accounts
       ) do
+    Logger.debug("Attempting transfer: #{inspect(transfer)}")
+
     {from, to} = ensure_accounts_if_needed(ensure_accounts, from, to)
 
     AccountBalance.lock_multi!([from, to], fn ->
