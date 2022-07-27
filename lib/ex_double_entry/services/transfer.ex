@@ -73,6 +73,8 @@ defmodule ExDoubleEntry.Transfer do
       AccountBalance.update_balance!(from, from_amount)
       AccountBalance.update_balance!(to, to_amount)
 
+      Logger.debug("Completed transfer: #{inspect(transfer)}")
+
       transfer
     end)
   end
