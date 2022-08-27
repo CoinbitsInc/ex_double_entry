@@ -35,6 +35,7 @@ defmodule ExDoubleEntry.Repo.Migrations.ExDoubleEntryMoney do
       add :partner_identifier, :string, null: false
       add :partner_scope, :string, null: false, default: ""
       add :metadata, json_type
+      add :idempotence, :uuid
       add :partner_line_id, references(:"#{ExDoubleEntry.db_table_prefix}lines")
       add :account_balance_id, references(:"#{ExDoubleEntry.db_table_prefix}account_balances"), null: false
 

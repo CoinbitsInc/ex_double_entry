@@ -4,7 +4,7 @@ defmodule ExDoubleEntry.Transfer do
   @type t() :: %__MODULE__{}
 
   @enforce_keys [:money, :from, :to, :code]
-  defstruct [:money, :from, :to, :code, :metadata]
+  defstruct [:money, :from, :to, :code, :metadata, :idempotence]
 
   alias ExDoubleEntry.{Account, AccountBalance, Guard, Line, MoneyProxy, Transfer}
 
@@ -20,7 +20,8 @@ defmodule ExDoubleEntry.Transfer do
     with {:ok, _} <- Guard.positive_amount?(transfer),
          {:ok, _} <- Guard.valid_definition?(transfer),
          {:ok, _} <- Guard.matching_currency?(transfer),
-         {:ok, _} <- Guard.positive_balance_if_enforced?(transfer) do
+         {:ok, _} <- Guard.positive_balance_if_enforced?(transfer),
+         {:ok, _} <- Guard.idempotent_if_provided?(transfer) do
       perform(transfer, ensure_accounts: ensure_accounts)
     end
   end
@@ -39,7 +40,8 @@ defmodule ExDoubleEntry.Transfer do
           from: from,
           to: to,
           code: code,
-          metadata: metadata
+          metadata: metadata,
+          idempotence: idempotence
         } = transfer,
         ensure_accounts: ensure_accounts
       ) do
@@ -53,7 +55,8 @@ defmodule ExDoubleEntry.Transfer do
           account: from,
           partner: to,
           code: code,
-          metadata: metadata
+          metadata: metadata,
+          idempotence: idempotence
         )
 
       line2 =
@@ -61,7 +64,8 @@ defmodule ExDoubleEntry.Transfer do
           account: to,
           partner: from,
           code: code,
-          metadata: metadata
+          metadata: metadata,
+          idempotence: idempotence
         )
 
       Line.update_partner_line_id!(line1, line2.id)

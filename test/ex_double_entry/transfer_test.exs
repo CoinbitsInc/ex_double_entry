@@ -58,6 +58,28 @@ defmodule ExDoubleEntry.TransferTest do
 
       assert Line |> ExDoubleEntry.repo().all() |> Enum.count() == 0
     end
+
+    test "idempotence", %{acc_a: acc_a, acc_b: acc_b} do
+      uuid = Ecto.UUID.generate()
+
+      assert {:ok, _transfer} =
+               Transfer.perform!(%Transfer{
+                 money: MoneyProxy.new(123_45, :USD),
+                 from: acc_a,
+                 to: acc_b,
+                 code: :deposit,
+                 idempotence: uuid
+               })
+
+      assert {:error, :non_idempotent_transfer, _} =
+               Transfer.perform!(%Transfer{
+                 money: MoneyProxy.new(123_45, :USD),
+                 from: acc_a,
+                 to: acc_b,
+                 code: :deposit,
+                 idempotence: uuid
+               })
+    end
   end
 
   test "perform/1", %{acc_a: acc_a, acc_b: acc_b} do

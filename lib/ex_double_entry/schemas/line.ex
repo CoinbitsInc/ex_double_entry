@@ -15,6 +15,7 @@ defmodule ExDoubleEntry.Line do
     field :partner_identifier, EctoType.Identifier
     field :partner_scope, EctoType.Scope
     field :metadata, :map
+    field :idempotence, :binary_id
 
     belongs_to :partner_line, Line
     belongs_to :account_balance, AccountBalance
@@ -34,6 +35,7 @@ defmodule ExDoubleEntry.Line do
       :partner_identifier,
       :partner_scope,
       :metadata,
+      :idempotence,
       :account_balance_id,
       :partner_line_id
     ])
@@ -49,17 +51,21 @@ defmodule ExDoubleEntry.Line do
     |> foreign_key_constraint(:account_balance_id)
   end
 
-  def insert!(money, account: account, partner: partner, code: code, metadata: metadata) do
+  def insert!(money, attrs) do
+    account = attrs[:account]
+    partner = attrs[:partner]
+
     %{
       account_identifier: account.identifier,
       account_scope: account.scope,
       currency: money.currency,
-      code: code,
+      code: attrs[:code],
       amount: money.amount,
       balance_amount: MoneyProxy.add(account.balance, money).amount,
       partner_identifier: partner.identifier,
       partner_scope: partner.scope,
-      metadata: metadata,
+      metadata: attrs[:metadata],
+      idempotence: attrs[:idempotence],
       account_balance_id: account.id
     }
     |> changeset()

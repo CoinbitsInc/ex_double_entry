@@ -1,5 +1,6 @@
 defmodule ExDoubleEntry.Guard do
-  alias ExDoubleEntry.{MoneyProxy, Transfer}
+  import Ecto.Query
+  alias ExDoubleEntry.{MoneyProxy, Line, Transfer}
 
   @doc """
   ## Examples
@@ -341,6 +342,21 @@ defmodule ExDoubleEntry.Guard do
        "Transfer: #{money.currency} #{money.amount}, :#{from.identifier} balance amount: #{from.balance.amount}"}
     else
       {:ok, transfer}
+    end
+  end
+
+  def idempotent_if_provided?(%Transfer{idempotence: nil} = transfer) do
+    {:ok, transfer}
+  end
+
+  def idempotent_if_provided?(%Transfer{idempotence: idempotence} = transfer) do
+    if ExDoubleEntry.repo().aggregate(
+         from(l in Line, where: l.idempotence == ^idempotence),
+         :count
+       ) == 0 do
+      {:ok, transfer}
+    else
+      {:error, :non_idempotent_transfer, "Transfer is not idempotent: #{idempotence}."}
     end
   end
 end

@@ -145,7 +145,10 @@ ExDoubleEntry.transfer(
   code: :deposit,
   # optional, metadata can be any arbitrary map, it gets stored in the DB
   # as either a JSON string (MySQL) or a JSONB object (Postgres)
-  metadata: %{diamond: "hands"}
+  metadata: %{diamond: "hands"},
+  # optional, a UUID can be used as the idempotence key to ensure the same
+  # transfer is not repeated multiple times
+  idempotence: "08eaa008-2d1c-4c20-b1c4-ed79065a0d6c"
 )
 # => {:ok, %ExDoubleEntry.Transfer{...}}
 

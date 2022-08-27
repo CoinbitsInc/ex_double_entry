@@ -12,6 +12,7 @@ defmodule ExDoubleEntry.LineTest do
 
   test "insert/2", %{acc_a: acc_a, acc_b: acc_b} do
     acc_a_id = acc_a.id
+    uuid = Ecto.UUID.generate()
 
     line =
       Line.insert!(
@@ -19,7 +20,8 @@ defmodule ExDoubleEntry.LineTest do
         account: acc_a,
         partner: acc_b,
         code: :deposit,
-        metadata: %{diamond: "hands"}
+        metadata: %{diamond: "hands"},
+        idempotence: uuid
       )
 
     amount = Decimal.new(100)
@@ -32,6 +34,7 @@ defmodule ExDoubleEntry.LineTest do
              balance_amount: ^amount,
              partner_identifier: :savings,
              metadata: %{diamond: "hands"},
+             idempotence: ^uuid,
              account_balance_id: ^acc_a_id
            } = line
   end
