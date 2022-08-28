@@ -36,12 +36,14 @@ defmodule ExDoubleEntry.GuardTest do
     end
 
     test "ok", %{acc_a: acc_a, acc_b: acc_b} do
+      uuid = Ecto.UUID.generate()
+
       Transfer.perform!(
         money: MoneyProxy.new(123_45, :USD),
         from: acc_a,
         to: acc_b,
         code: :deposit,
-        idempotence: Ecto.UUID.generate()
+        idempotence: uuid
       )
 
       assert {:ok, _transfer} =
@@ -51,6 +53,15 @@ defmodule ExDoubleEntry.GuardTest do
                  to: acc_b,
                  code: :deposit,
                  idempotence: Ecto.UUID.generate()
+               })
+
+      assert {:ok, _transfer} =
+               Guard.idempotent_if_provided?(%Transfer{
+                 money: MoneyProxy.new(123_45, :USD),
+                 from: acc_a,
+                 to: acc_b,
+                 code: :withdraw,
+                 idempotence: uuid
                })
     end
 

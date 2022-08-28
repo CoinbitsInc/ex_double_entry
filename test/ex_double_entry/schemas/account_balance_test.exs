@@ -94,34 +94,22 @@ defmodule ExDoubleEntry.AccountBalanceTest do
     end
   end
 
-  describe "for_account!/1" do
-    test "a" do
-      ab =
-        AccountBalance.for_account!(%Account{
-          identifier: :crypto,
-          currency: :BTC
-        })
+  test "for_account!/1" do
+    ab =
+      AccountBalance.for_account!(%Account{
+        identifier: :crypto,
+        currency: :BTC
+      })
 
-      amount = Decimal.new(0)
+    amount = Decimal.new(0)
 
-      assert %AccountBalance{
-               identifier: :crypto,
-               currency: :BTC,
-               scope: nil,
-               balance_amount: ^amount,
-               metadata: nil
-             } = ab
-    end
-
-    test "b" do
-      assert_raise(Account.InvalidScopeError, fn ->
-        AccountBalance.for_account!(%Account{
-          identifier: :crypto,
-          currency: :BTC,
-          scope: ""
-        })
-      end)
-    end
+    assert %AccountBalance{
+             identifier: :crypto,
+             currency: :BTC,
+             scope: nil,
+             balance_amount: ^amount,
+             metadata: nil
+           } = ab
   end
 
   describe "lock_multi!/2" do

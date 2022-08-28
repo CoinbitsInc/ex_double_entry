@@ -44,7 +44,7 @@ defmodule ExDoubleEntry.Repo.Migrations.ExDoubleEntryMoney do
 
     create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:code, :account_identifier, :currency, :inserted_at], name: :code_account_identifier_currency_inserted_at_index, prefix: ExDoubleEntry.db_schema())
     create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:account_scope, :account_identifier, :currency, :inserted_at], name: :account_scope_account_identifier_currency_inserted_at_index, prefix: ExDoubleEntry.db_schema())
-    create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:idempotence], name: :idempotence, prefix: ExDoubleEntry.db_schema())
+    create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:idempotence, :code, :account_identifier, :account_scope, :partner_identifier, :partner_scope], name: :idempotence, prefix: ExDoubleEntry.db_schema())
   end
 
   def down do

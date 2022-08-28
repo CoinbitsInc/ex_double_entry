@@ -349,9 +349,28 @@ defmodule ExDoubleEntry.Guard do
     {:ok, transfer}
   end
 
-  def idempotent_if_provided?(%Transfer{idempotence: idempotence} = transfer) do
+  def idempotent_if_provided?(
+        %Transfer{
+          from: from,
+          to: to,
+          code: code,
+          idempotence: idempotence
+        } = transfer
+      ) do
+    from_scope = from.scope || ""
+    to_scope = to.scope || ""
+
     if ExDoubleEntry.repo().aggregate(
-         from(l in Line, where: l.idempotence == ^idempotence),
+         from(
+           l in Line,
+           where:
+             l.account_identifier == ^from.identifier and
+               l.account_scope == ^from_scope and
+               l.partner_identifier == ^to.identifier and
+               l.partner_scope == ^to_scope and
+               l.code == ^code and
+               l.idempotence == ^idempotence
+         ),
          :count
        ) == 0 do
       {:ok, transfer}
