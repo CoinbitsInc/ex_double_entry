@@ -357,7 +357,6 @@ defmodule ExDoubleEntry.Guard do
           idempotence: idempotence
         } = transfer
       ) do
-    from_scope = from.scope || ""
     to_scope = to.scope || ""
 
     if ExDoubleEntry.repo().aggregate(
