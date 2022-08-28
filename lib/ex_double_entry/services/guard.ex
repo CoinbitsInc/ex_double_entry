@@ -364,8 +364,7 @@ defmodule ExDoubleEntry.Guard do
          from(
            l in Line,
            where:
-             l.account_identifier == ^from.identifier and
-               l.account_scope == ^from_scope and
+             l.account_balance_id == ^from.id and
                l.partner_identifier == ^to.identifier and
                l.partner_scope == ^to_scope and
                l.code == ^code and

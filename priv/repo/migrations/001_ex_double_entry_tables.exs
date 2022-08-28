@@ -44,7 +44,13 @@ defmodule ExDoubleEntry.Repo.Migrations.ExDoubleEntryMoney do
 
     create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:code, :account_identifier, :currency, :inserted_at], name: :code_account_identifier_currency_inserted_at_index, prefix: ExDoubleEntry.db_schema())
     create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:account_scope, :account_identifier, :currency, :inserted_at], name: :account_scope_account_identifier_currency_inserted_at_index, prefix: ExDoubleEntry.db_schema())
-    create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:idempotence, :code, :account_identifier, :account_scope, :partner_identifier, :partner_scope], name: :idempotence, prefix: ExDoubleEntry.db_schema())
+
+    if ExDoubleEntry.Repo.__adapter__ == Ecto.Adapters.Postgres do
+      create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:idempotence, :code, :account_balance_id, :partner_identifier, :partner_scope], name: :idempotence, prefix: ExDoubleEntry.db_schema())
+    else
+      # MySQL unfortunately has a max key length is 3072 bytes for indexes
+      create index(:"#{ExDoubleEntry.db_table_prefix}lines", [:idempotence, :code, :account_balance_id, :partner_identifier], name: :idempotence, prefix: ExDoubleEntry.db_schema())
+    end
   end
 
   def down do
