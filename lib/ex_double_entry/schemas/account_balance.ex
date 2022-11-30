@@ -94,7 +94,7 @@ defmodule ExDoubleEntry.AccountBalance do
 
   defp lock_cond(query, lock) do
     case lock do
-      true -> lock(query, "FOR SHARE NOWAIT")
+      true -> lock(query, "FOR SHARE")
       false -> query
     end
   end
