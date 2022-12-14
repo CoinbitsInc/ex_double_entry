@@ -334,12 +334,12 @@ defmodule ExDoubleEntry.Guard do
   iex>   code: :deposit
   iex> }
   iex> |> Guard.positive_balance_if_enforced?()
-  {:error, :insufficient_balance, "Transfer: USD 42, :checking balance amount: 10"}
+  {:error, :insufficient_balance, "Transfer: USD 42, from :checking (balance amount: 10) to :savings"}
   """
-  def positive_balance_if_enforced?(%Transfer{money: money, from: from} = transfer) do
+  def positive_balance_if_enforced?(%Transfer{money: money, from: from, to: to} = transfer) do
     if !!from.positive_only? and MoneyProxy.cmp(from.balance, money) == :lt do
       {:error, :insufficient_balance,
-       "Transfer: #{money.currency} #{money.amount}, :#{from.identifier} balance amount: #{from.balance.amount}"}
+       "Transfer: #{money.currency} #{money.amount}, from :#{from.identifier} (balance amount: #{from.balance.amount}) to :#{to.identifier}"}
     else
       {:ok, transfer}
     end
