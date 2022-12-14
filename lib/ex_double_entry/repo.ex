@@ -1,5 +1,5 @@
 defmodule ExDoubleEntry.Repo do
-  @db Application.fetch_env!(:ex_double_entry, :db)
+  @db Application.compile_env(:ex_double_entry, :db)
 
   @db_adapter (case @db do
                  :postgres -> Ecto.Adapters.Postgres
