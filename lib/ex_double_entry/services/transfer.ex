@@ -1,7 +1,8 @@
 defmodule ExDoubleEntry.Transfer do
   require Logger
 
-  @type t() :: %__MODULE__{} | {:error, atom(), String.t()}
+  @type t() :: %__MODULE__{}
+  @type result() :: {:ok, %__MODULE__{}} | {:error, atom(), String.t()}
 
   @enforce_keys [:money, :from, :to, :code]
   defstruct [:money, :from, :to, :code, :metadata, :idempotence]
