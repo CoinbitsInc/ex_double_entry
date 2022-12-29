@@ -46,7 +46,7 @@ defmodule ExDoubleEntry.Transfer do
         } = transfer,
         ensure_accounts: ensure_accounts
       ) do
-    Logger.debug("Attempting transfer: #{inspect(transfer)}")
+    Logger.debug(fn -> "Attempting transfer: #{inspect(transfer)}" end)
 
     {from, to} = ensure_accounts_if_needed(ensure_accounts, from, to)
 
@@ -78,7 +78,7 @@ defmodule ExDoubleEntry.Transfer do
       AccountBalance.update_balance!(from, from_amount)
       AccountBalance.update_balance!(to, to_amount)
 
-      Logger.debug("Completed transfer: #{inspect(transfer)}")
+      Logger.debug(fn -> "Completed transfer: #{inspect(transfer)}" end)
 
       transfer
     end)

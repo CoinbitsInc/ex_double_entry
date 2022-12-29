@@ -74,9 +74,9 @@ defmodule ExDoubleEntry.AccountBalance do
     |> ExDoubleEntry.repo().one()
     |> case do
       nil ->
-        Logger.debug(
+        Logger.debug(fn ->
           "Account not found with identifier: #{identifier}, currency: #{currency} and scope: #{scope}."
-        )
+        end)
 
         nil
 
