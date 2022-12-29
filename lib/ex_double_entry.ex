@@ -33,7 +33,7 @@ defmodule ExDoubleEntry do
   @doc """
   ## Examples
 
-  iex> [ExDoubleEntry.make_account!(:savings)] |> ExDoubleEntry.lock_accounts(fn -> true end)
+  iex> [ExDoubleEntry.make_account!(:savings)] |> ExDoubleEntry.lock_accounts(fn [_acc] -> true end)
   {:ok, true}
   """
   defdelegate lock_accounts(accounts, fun), to: ExDoubleEntry.AccountBalance, as: :lock_multi!

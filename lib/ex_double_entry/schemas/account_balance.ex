@@ -105,8 +105,15 @@ defmodule ExDoubleEntry.AccountBalance do
 
   def lock_multi!(accounts, fun) do
     ExDoubleEntry.repo().transaction(fn ->
-      accounts |> Enum.sort() |> Enum.map(fn account -> lock!(account) end)
-      fun.()
+      accounts
+      |> Enum.sort()
+      |> Enum.map(&lock!/1)
+      |> then(fn locked_accounts ->
+        accounts
+        |> Enum.map(fn account -> Enum.find(locked_accounts, &compare_by_id(&1, account)) end)
+        |> Enum.map(&Account.present/1)
+        |> fun.()
+      end)
     end)
   end
 
@@ -116,4 +123,7 @@ defmodule ExDoubleEntry.AccountBalance do
     |> Ecto.Changeset.change(balance_amount: balance_amount)
     |> ExDoubleEntry.repo().update!()
   end
+
+  defp compare_by_id(%{id: id}, %{id: id}), do: true
+  defp compare_by_id(_acc1, _acc2), do: false
 end

@@ -50,7 +50,7 @@ defmodule ExDoubleEntry.Transfer do
 
     {from, to} = ensure_accounts_if_needed(ensure_accounts, from, to)
 
-    AccountBalance.lock_multi!([from, to], fn ->
+    AccountBalance.lock_multi!([from, to], fn [from, to] ->
       line1 =
         Line.insert!(MoneyProxy.neg(money),
           account: from,

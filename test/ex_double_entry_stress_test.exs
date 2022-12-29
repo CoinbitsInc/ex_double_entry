@@ -72,7 +72,7 @@ defmodule ExDoubleEntryStressTest do
                     amount = :rand.uniform(1_000_00)
 
                     {:ok, {amount_a, amount_b}} =
-                      lock_accounts([acc_a, acc_b], fn ->
+                      lock_accounts([acc_a, acc_b], fn [acc_a, acc_b] ->
                         {:ok, _} =
                           transfer!(
                             money: MoneyProxy.new(amount, :USD),

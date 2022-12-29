@@ -13,7 +13,7 @@ defmodule ExDoubleEntryTest do
 
     test "successful", %{acc_a: acc_a, acc_b: acc_b} do
       result =
-        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn ->
+        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn [acc_a, acc_b] ->
           ExDoubleEntry.transfer!(
             money: MoneyProxy.new(100, :USD),
             from: acc_a,
@@ -30,7 +30,7 @@ defmodule ExDoubleEntryTest do
 
     test "failure", %{acc_a: acc_a, acc_b: acc_b} do
       assert_raise(RuntimeError, fn ->
-        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn ->
+        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn [acc_a, acc_b] ->
           ExDoubleEntry.transfer!(
             money: MoneyProxy.new(100, :USD),
             from: acc_a,
@@ -47,7 +47,7 @@ defmodule ExDoubleEntryTest do
 
     test "zero amount transfer", %{acc_a: acc_a, acc_b: acc_b} do
       result =
-        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn ->
+        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn [acc_a, acc_b] ->
           ExDoubleEntry.transfer!(
             money: MoneyProxy.new(0, :USD),
             from: acc_a,
@@ -73,7 +73,7 @@ defmodule ExDoubleEntryTest do
 
     test "transfer!/1", %{acc_a: acc_a, acc_b: acc_b} do
       result =
-        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn ->
+        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn [nil, nil] ->
           ExDoubleEntry.transfer!(
             money: MoneyProxy.new(100, :USD),
             from: acc_a,
@@ -90,7 +90,7 @@ defmodule ExDoubleEntryTest do
 
     test "transfer/1", %{acc_a: acc_a, acc_b: acc_b} do
       assert_raise(Account.NotFoundError, fn ->
-        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn ->
+        ExDoubleEntry.lock_accounts([acc_a, acc_b], fn [nil, nil] ->
           ExDoubleEntry.transfer(
             money: MoneyProxy.new(100, :USD),
             from: acc_a,

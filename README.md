@@ -226,7 +226,7 @@ flattened and are committed or rolled back based on the outer most transaction.
 Read more on Ecto's transaction handling [here](https://hexdocs.pm/ecto/Ecto.Repo.html#c:transaction/2).
 
 ```elixir
-ExDoubleEntry.lock_accounts([account_a, account_b], fn ->
+ExDoubleEntry.lock_accounts([account_a, account_b], fn [account_a, account_b] ->
   ExDoubleEntry.transfer!(
     money: Money.new(100, :USD),
     from: account_a,
