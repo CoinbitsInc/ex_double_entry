@@ -87,15 +87,24 @@ defmodule ExDoubleEntry.AccountBalance do
 
   defp scope_cond(query, scope) do
     case scope do
-      nil -> where(query, [ab], ab.scope == "")
+      nil -> where(query, [ab], ab.scope == ^"")
       _ -> where(query, [ab], ab.scope == ^scope)
     end
   end
 
-  defp lock_cond(query, lock) do
-    case lock do
-      true -> lock(query, "FOR SHARE")
-      false -> query
+  if ExDoubleEntry.Repo.__adapter__() == Ecto.Adapters.Postgres do
+    defp lock_cond(query, lock) do
+      case lock do
+        true -> lock(query, "FOR NO KEY UPDATE")
+        false -> query
+      end
+    end
+  else
+    defp lock_cond(query, lock) do
+      case lock do
+        true -> lock(query, "FOR UPDATE")
+        false -> query
+      end
     end
   end
 
