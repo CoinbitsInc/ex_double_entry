@@ -20,8 +20,7 @@ config :ex_double_entry,
     ],
     withdraw: [
       {:savings, :checking}
-    ],
-    stress_test: []
+    ]
   }
 
 import_config "#{config_env()}.exs"
