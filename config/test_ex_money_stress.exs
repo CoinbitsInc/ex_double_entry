@@ -1,8 +1,17 @@
 import Config
 
 config :ex_double_entry,
+  accounts: %{
+    checking: [],
+    credit: [positive_only: true]
+  },
   db: :postgres,
-  money: :ex_money
+  money: :ex_money,
+  transfers: %{
+    transfer: [
+      {:credit, :checking}
+    ]
+  }
 
 config :ex_double_entry, ExDoubleEntry.Repo,
   username: System.get_env("POSTGRES_DB_USERNAME", "postgres"),
