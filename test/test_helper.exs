@@ -1,16 +1,15 @@
+require Logger
+
 {:ok, _} = Application.ensure_all_started(:ex_machina)
 
 ExUnit.start(timeout: 300_000)
-ExUnit.configure(exclude: [stress_test: true])
 
-require Logger
-
-configuration = Application.get_env(:ex_double_entry, ExDoubleEntry.Repo)
-
-if configuration[:pool] == Ecto.Adapters.SQL.Sandbox do
-  Ecto.Adapters.SQL.Sandbox.mode(ExDoubleEntry.repo(), :manual)
-else
+if System.get_env("MIX_ENV") == "test_ex_money_stress" do
   Logger.info("Repository is not running in a sandbox mode...")
+  ExUnit.configure(exclude: [stress_test: false])
+else
+  Ecto.Adapters.SQL.Sandbox.mode(ExDoubleEntry.repo(), :manual)
+  ExUnit.configure(exclude: [stress_test: true])
 end
 
 db = Application.fetch_env!(:ex_double_entry, :db)

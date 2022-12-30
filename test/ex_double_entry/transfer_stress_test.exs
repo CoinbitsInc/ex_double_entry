@@ -3,7 +3,7 @@ defmodule ExDoubleEntry.TransferStressTest do
   alias ExDoubleEntry.{Account, AccountBalance, Line, MoneyProxy, Transfer}
   doctest Transfer
 
-  @moduletag :stress_test
+  @moduletag stress_test: true
 
   @stress_test_transfers_count 1_000
 

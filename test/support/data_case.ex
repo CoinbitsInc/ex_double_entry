@@ -3,6 +3,8 @@ defmodule ExDoubleEntry.DataCase do
 
   using do
     quote do
+      @moduletag stress_test: false
+
       import Ecto
       import Ecto.Changeset
       import Ecto.Query

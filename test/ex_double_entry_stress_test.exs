@@ -4,7 +4,7 @@ defmodule ExDoubleEntryStressTest do
   import Ecto.Query
   alias ExDoubleEntry.{Line, MoneyProxy}
 
-  @moduletag :stress_test
+  @moduletag stress_test: true
 
   @processes 5
   @account_pairs_per_process 10
