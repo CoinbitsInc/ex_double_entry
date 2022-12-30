@@ -3,6 +3,8 @@ defmodule ExDoubleEntry do
   @db_table_prefix Application.compile_env(:ex_double_entry, :db_table_prefix)
   @repo Application.compile_env(:ex_double_entry, :repo)
 
+  @dialyzer {:nowarn_function, {:db_schema, 0}}
+
   def db_schema do
     if ExDoubleEntry.Repo.__adapter__() == Ecto.Adapters.Postgres do
       @db_schema

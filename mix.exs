@@ -3,17 +3,18 @@ defmodule ExDoubleEntry.MixProject do
 
   def project do
     [
+      aliases: aliases(),
       app: :ex_double_entry,
-      version: "0.1.2",
+      deps: deps(),
+      description: description(),
+      dialyzer: dialyzer(),
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      start_permanent: Mix.env() == :prod,
-      aliases: aliases(),
-      deps: deps(),
       name: "ExDoubleEntry",
-      description: description(),
       package: package(),
-      source_url: "https://github.com/coinjar/ex_double_entry"
+      source_url: "https://github.com/coinjar/ex_double_entry",
+      start_permanent: Mix.env() == :prod,
+      version: "0.1.2"
     ]
   end
 
@@ -54,6 +55,13 @@ defmodule ExDoubleEntry.MixProject do
 
   defp description() do
     "An Elixir double-entry library inspired by Ruby's DoubleEntry. Brought to you by CoinJar."
+  end
+
+  defp dialyzer do
+    [
+      plt_core_path: "_build/dialyzer",
+      plt_local_path: "_build/dialyzer"
+    ]
   end
 
   defp package() do
