@@ -74,9 +74,9 @@ defmodule ExDoubleEntry.AccountBalance do
     |> ExDoubleEntry.repo().one()
     |> case do
       nil ->
-        Logger.debug(
+        Logger.debug(fn ->
           "Account not found with identifier: #{identifier}, currency: #{currency} and scope: #{scope}."
-        )
+        end)
 
         nil
 
@@ -87,15 +87,24 @@ defmodule ExDoubleEntry.AccountBalance do
 
   defp scope_cond(query, scope) do
     case scope do
-      nil -> where(query, [ab], ab.scope == "")
+      nil -> where(query, [ab], ab.scope == ^"")
       _ -> where(query, [ab], ab.scope == ^scope)
     end
   end
 
-  defp lock_cond(query, lock) do
-    case lock do
-      true -> lock(query, "FOR SHARE")
-      false -> query
+  if ExDoubleEntry.Repo.__adapter__() == Ecto.Adapters.Postgres do
+    defp lock_cond(query, lock) do
+      case lock do
+        true -> lock(query, "FOR NO KEY UPDATE")
+        false -> query
+      end
+    end
+  else
+    defp lock_cond(query, lock) do
+      case lock do
+        true -> lock(query, "FOR UPDATE")
+        false -> query
+      end
     end
   end
 
@@ -105,8 +114,15 @@ defmodule ExDoubleEntry.AccountBalance do
 
   def lock_multi!(accounts, fun) do
     ExDoubleEntry.repo().transaction(fn ->
-      accounts |> Enum.sort() |> Enum.map(fn account -> lock!(account) end)
-      fun.()
+      accounts
+      |> Enum.sort()
+      |> Enum.map(&lock!/1)
+      |> then(fn locked_accounts ->
+        accounts
+        |> Enum.map(fn account -> Enum.find(locked_accounts, &compare_by_id(&1, account)) end)
+        |> Enum.map(&Account.present/1)
+        |> fun.()
+      end)
     end)
   end
 
@@ -116,4 +132,7 @@ defmodule ExDoubleEntry.AccountBalance do
     |> Ecto.Changeset.change(balance_amount: balance_amount)
     |> ExDoubleEntry.repo().update!()
   end
+
+  defp compare_by_id(%{id: id}, %{id: id}), do: true
+  defp compare_by_id(_acc1, _acc2), do: false
 end

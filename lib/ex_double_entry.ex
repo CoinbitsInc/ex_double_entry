@@ -3,6 +3,8 @@ defmodule ExDoubleEntry do
   @db_table_prefix Application.compile_env(:ex_double_entry, :db_table_prefix)
   @repo Application.compile_env(:ex_double_entry, :repo)
 
+  @dialyzer {:nowarn_function, {:db_schema, 0}}
+
   def db_schema do
     if ExDoubleEntry.Repo.__adapter__() == Ecto.Adapters.Postgres do
       @db_schema
@@ -33,7 +35,7 @@ defmodule ExDoubleEntry do
   @doc """
   ## Examples
 
-  iex> [ExDoubleEntry.make_account!(:savings)] |> ExDoubleEntry.lock_accounts(fn -> true end)
+  iex> [ExDoubleEntry.make_account!(:savings)] |> ExDoubleEntry.lock_accounts(fn [_acc] -> true end)
   {:ok, true}
   """
   defdelegate lock_accounts(accounts, fun), to: ExDoubleEntry.AccountBalance, as: :lock_multi!

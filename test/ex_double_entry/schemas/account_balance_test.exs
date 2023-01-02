@@ -124,7 +124,7 @@ defmodule ExDoubleEntry.AccountBalanceTest do
       tasks =
         for i <- 0..4 do
           Task.async(fn ->
-            AccountBalance.lock_multi!([acc_a, acc_b], fn -> i end)
+            AccountBalance.lock_multi!([acc_a, acc_b], fn _ -> i end)
           end)
         end
         |> Task.await_many()
@@ -135,11 +135,11 @@ defmodule ExDoubleEntry.AccountBalanceTest do
     test "failed locks", %{acc_a: acc_a, acc_b: acc_b} do
       [
         Task.async(fn ->
-          AccountBalance.lock_multi!([acc_a, acc_b], fn -> :timer.sleep(1600) end)
+          AccountBalance.lock_multi!([acc_a, acc_b], fn _ -> :timer.sleep(1600) end)
         end),
         Task.async(fn ->
           assert_raise(DBConnection.ConnectionError, fn ->
-            AccountBalance.lock_multi!([acc_a, acc_b], fn ->
+            AccountBalance.lock_multi!([acc_a, acc_b], fn _ ->
               Transfer.perform(%Transfer{
                 money: MoneyProxy.new(42, :USD),
                 from: acc_a,

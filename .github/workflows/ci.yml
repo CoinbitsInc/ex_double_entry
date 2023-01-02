@@ -1,5 +1,6 @@
 name: CI
-on: [push, pull_request]
+on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -7,7 +8,7 @@ jobs:
       matrix:
         otp: [24.3, 25.2]
         elixir: [1.14.2]
-        env: [test_money, test_mysql_money, test_ex_money, test_mysql_ex_money]
+        env: [test_money, test_mysql_money, test_ex_money, test_ex_money_stress, test_mysql_ex_money]
 
     services:
       postgres:
@@ -36,6 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Elixir
+      id: beam
       uses: erlef/setup-beam@v1
       with:
         elixir-version: ${{ matrix.elixir }}
@@ -44,11 +46,25 @@ jobs:
       uses: actions/cache@v2
       with:
         path: deps
-        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-        restore-keys: ${{ runner.os }}-mix-
+        key: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-mix-
     - name: Install dependencies
       run: mix deps.get
     - name: Run tests
       env:
         MIX_ENV: ${{ matrix.env }}
       run: mix test
+    - name: Run formatting check
+      run: mix format --check-formatted
+    - name: Restore Dialyzer PLT cache
+      uses: actions/cache@v3
+      id: dialyzer_plt_cache
+      with:
+        path: _build/dialyzer
+        key: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-dialyzer-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-dialyzer-
+    - name: Create PLTs
+      if: steps.dialyzer_plt_cache.outputs.cache-hit != 'true'
+      run: mkdir _build/dialyzer && mix dialyzer --plt
+    - name: Run Dialyzer
+      run: mix dialyzer

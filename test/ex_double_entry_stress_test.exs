@@ -1,12 +1,22 @@
 defmodule ExDoubleEntryStressTest do
-  use ExDoubleEntry.DataCase
+  use ExDoubleEntry.DataCase, async: false
   import ExDoubleEntry
   import Ecto.Query
   alias ExDoubleEntry.{Line, MoneyProxy}
 
+  @moduletag stress_test: true
+
   @processes 5
-  @account_pairs_per_process 5
-  @transfers_per_account 20
+  @account_pairs_per_process 10
+  @transfers_per_account 100
+
+  setup do
+    initial_transfers_config = Application.fetch_env!(:ex_double_entry, :transfers)
+
+    on_exit(fn ->
+      Application.put_env(:ex_double_entry, :transfers, initial_transfers_config)
+    end)
+  end
 
   test "stress test" do
     accounts_config = Application.fetch_env!(:ex_double_entry, :accounts)
@@ -26,11 +36,11 @@ defmodule ExDoubleEntryStressTest do
               acc_b_identifier => []
             })
 
-          transfers_config_items = tc[:stress_test] ++ [{acc_a_identifier, acc_b_identifier}]
+          transfers_config_items = tc[:transfer] ++ [{acc_a_identifier, acc_b_identifier}]
 
           merged_transfers_config =
             Map.merge(tc, %{
-              stress_test: transfers_config_items
+              transfer: transfers_config_items
             })
 
           {merged_accounts_config, merged_transfers_config}
@@ -72,13 +82,13 @@ defmodule ExDoubleEntryStressTest do
                     amount = :rand.uniform(1_000_00)
 
                     {:ok, {amount_a, amount_b}} =
-                      lock_accounts([acc_a, acc_b], fn ->
+                      lock_accounts([acc_a, acc_b], fn [acc_a, acc_b] ->
                         {:ok, _} =
                           transfer!(
                             money: MoneyProxy.new(amount, :USD),
                             from: acc_a,
                             to: acc_b,
-                            code: :stress_test
+                            code: :transfer
                           )
 
                         amount_a = Decimal.new(-amount)
@@ -103,7 +113,7 @@ defmodule ExDoubleEntryStressTest do
                             l in Line,
                             where: l.account_identifier == ^acc_a_identifier,
                             where: l.partner_identifier == ^acc_b_identifier,
-                            where: l.code == :stress_test,
+                            where: l.code == :transfer,
                             order_by: [desc: l.balance_amount]
                           )
                           |> scope_cond.(scope)
@@ -114,7 +124,7 @@ defmodule ExDoubleEntryStressTest do
                             l in Line,
                             where: l.account_identifier == ^acc_b_identifier,
                             where: l.partner_identifier == ^acc_a_identifier,
-                            where: l.code == :stress_test,
+                            where: l.code == :transfer,
                             order_by: [asc: l.balance_amount]
                           )
                           |> scope_cond.(scope)

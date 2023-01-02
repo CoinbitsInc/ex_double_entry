@@ -3,6 +3,8 @@ defmodule ExDoubleEntry.DataCase do
 
   using do
     quote do
+      @moduletag stress_test: false
+
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
@@ -12,13 +14,24 @@ defmodule ExDoubleEntry.DataCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(ExDoubleEntry.repo())
+    if tags[:stress_test] do
+      on_exit(&truncate_tables/0)
+    else
+      :ok = Ecto.Adapters.SQL.Sandbox.checkout(ExDoubleEntry.repo())
 
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(ExDoubleEntry.repo(), {:shared, self()})
+      unless tags[:async] do
+        Ecto.Adapters.SQL.Sandbox.mode(ExDoubleEntry.repo(), {:shared, self()})
+      end
     end
 
     :ok
+  end
+
+  def truncate_tables do
+    Enum.each([:account_balances, :lines], fn name ->
+      table = "#{ExDoubleEntry.db_table_prefix()}#{name}"
+      ExDoubleEntry.repo() |> Ecto.Adapters.SQL.query("TRUNCATE #{table} CASCADE")
+    end)
   end
 
   @doc """
