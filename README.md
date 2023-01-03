@@ -245,4 +245,4 @@ Licensed under [MIT](LICENSE.md).
 ## Sponsors
 
 - [CoinJar](https://coinjar.com)
-- [Coinbits](https://coinbits.com)
+- [Coinbits](https://coinbits.app)
