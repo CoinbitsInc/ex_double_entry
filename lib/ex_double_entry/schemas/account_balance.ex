@@ -126,6 +126,27 @@ defmodule ExDoubleEntry.AccountBalance do
     end)
   end
 
+  @spec locked?(list(Account.t())) :: boolean()
+  def locked?(accounts) when is_list(accounts) do
+    Enum.any?(accounts, &locked?/1)
+  end
+
+  @spec locked?(Account.t()) :: boolean()
+  def locked?(%Account{} = account) do
+    subset =
+      AccountBalance
+      |> from()
+      |> where([r], r.id == ^account.id)
+      |> lock("FOR UPDATE SKIP LOCKED")
+      |> select([r], r.id)
+
+    AccountBalance
+    |> from()
+    |> where([r], r.id == ^account.id)
+    |> where([r], r.id not in subquery(subset))
+    |> ExDoubleEntry.repo().exists?()
+  end
+
   def update_balance!(%Account{} = account, balance_amount) do
     account
     |> lock!()

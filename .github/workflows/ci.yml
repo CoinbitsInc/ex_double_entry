@@ -8,7 +8,7 @@ jobs:
       matrix:
         otp: [24.3, 25.2]
         elixir: [1.14.2]
-        env: [test_money, test_mysql_money, test_ex_money, test_ex_money_stress, test_mysql_ex_money]
+        env: [test_money, test_mysql_money, test_ex_money, test_ex_money_concurrent_db_pool, test_mysql_ex_money]
 
     services:
       postgres:

@@ -154,4 +154,47 @@ defmodule ExDoubleEntry.AccountBalanceTest do
       |> Task.await_many()
     end
   end
+
+  describe "locked?/1" do
+    setup do
+      acc_a = :account_balance |> insert(identifier: :credit) |> Account.present()
+      acc_b = :account_balance |> insert(identifier: :checking) |> Account.present()
+
+      [accounts: [acc_a, acc_b]]
+    end
+
+    @tag concurrent_db_pool: true
+    test "returns false when is not locked", %{accounts: accounts} do
+      refute AccountBalance.locked?(accounts)
+      refute AccountBalance.locked?(hd(accounts))
+    end
+
+    @tag concurrent_db_pool: true
+    test "returns true when any given account is locked", %{accounts: [acc_a, acc_b]} do
+      {:ok, pid} =
+        Task.start_link(fn ->
+          receive do
+            :lock ->
+              AccountBalance.lock_multi!([acc_a], fn _accounts ->
+                receive do
+                  :unlock -> :ok
+                end
+              end)
+          end
+        end)
+
+      send(pid, :lock)
+
+      # Let the child process create a lock:
+      :timer.sleep(20)
+
+      assert AccountBalance.locked?(acc_a)
+      assert AccountBalance.locked?([acc_b, acc_a])
+
+      send(pid, :unlock)
+
+      refute AccountBalance.locked?(acc_b)
+      refute AccountBalance.locked?([acc_b, acc_a])
+    end
+  end
 end

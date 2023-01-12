@@ -27,7 +27,7 @@ defmodule ExDoubleEntry.MixProject do
 
   defp elixirc_paths(:test_money), do: ["lib", "test/support"]
   defp elixirc_paths(:test_ex_money), do: ["lib", "test/support"]
-  defp elixirc_paths(:test_ex_money_stress), do: ["lib", "test/support"]
+  defp elixirc_paths(:test_ex_money_concurrent_db_pool), do: ["lib", "test/support"]
   defp elixirc_paths(:test_mysql_money), do: ["lib", "test/support"]
   defp elixirc_paths(:test_mysql_ex_money), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
@@ -36,7 +36,8 @@ defmodule ExDoubleEntry.MixProject do
     [
       {:jason, "~> 1.2"},
       {:money, "~> 1.9", only: [:test_money, :test_mysql_money]},
-      {:ex_money, "~> 5.10", only: [:test_ex_money, :test_ex_money_stress, :test_mysql_ex_money]},
+      {:ex_money, "~> 5.10",
+       only: [:test_ex_money, :test_ex_money_concurrent_db_pool, :test_mysql_ex_money]},
       {:ecto_sql, "~> 3.7"},
       {:postgrex, ">= 0.0.0", optional: true},
       {:myxql, ">= 0.0.0", optional: true},
@@ -45,7 +46,7 @@ defmodule ExDoubleEntry.MixProject do
          :test_money,
          :test_mysql_money,
          :test_ex_money,
-         :test_ex_money_stress,
+         :test_ex_money_concurrent_db_pool,
          :test_mysql_ex_money
        ]},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
