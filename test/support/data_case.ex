@@ -3,7 +3,7 @@ defmodule ExDoubleEntry.DataCase do
 
   using do
     quote do
-      @moduletag stress_test: false
+      @moduletag concurrent_db_pool: false
 
       import Ecto
       import Ecto.Changeset
@@ -14,7 +14,7 @@ defmodule ExDoubleEntry.DataCase do
   end
 
   setup tags do
-    if tags[:stress_test] do
+    if tags[:concurrent_db_pool] do
       on_exit(&truncate_tables/0)
     else
       :ok = Ecto.Adapters.SQL.Sandbox.checkout(ExDoubleEntry.repo())

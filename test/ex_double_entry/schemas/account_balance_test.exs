@@ -163,15 +163,15 @@ defmodule ExDoubleEntry.AccountBalanceTest do
       [accounts: [acc_a, acc_b]]
     end
 
-    @tag stress_test: true
+    @tag concurrent_db_pool: true
     test "returns false when is not locked", %{accounts: accounts} do
       refute AccountBalance.locked?(accounts)
       refute AccountBalance.locked?(hd(accounts))
     end
 
-    @tag stress_test: true
+    @tag concurrent_db_pool: true
     test "returns true when any given account is locked", %{accounts: [acc_a, acc_b]} do
-      {:ok,pid} =
+      {:ok, pid} =
         Task.start_link(fn ->
           receive do
             :lock ->

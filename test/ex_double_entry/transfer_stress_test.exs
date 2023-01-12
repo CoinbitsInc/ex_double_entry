@@ -7,15 +7,15 @@ defmodule ExDoubleEntry.TransferStressTest do
   alias ExDoubleEntry.MoneyProxy
   alias ExDoubleEntry.Transfer
 
-  @moduletag stress_test: true
+  @moduletag concurrent_db_pool: true
 
-  @stress_test_transfers_count 1_000
+  @transfers_count 1_000
 
   setup do
     credit_account =
       :account_balance
       |> insert(
-        balance_amount: @stress_test_transfers_count,
+        balance_amount: @transfers_count,
         identifier: :credit,
         scope: to_string(__MODULE__)
       )
@@ -62,7 +62,7 @@ defmodule ExDoubleEntry.TransferStressTest do
                    Transfer.perform(%Transfer{
                      code: :transfer,
                      from: credit_account,
-                     money: MoneyProxy.new(@stress_test_transfers_count, :USD),
+                     money: MoneyProxy.new(@transfers_count, :USD),
                      to: checking_account
                    })
                  end)
@@ -102,7 +102,7 @@ defmodule ExDoubleEntry.TransferStressTest do
       checking_account: checking_account,
       pool_size: pool_size
     } do
-      1..@stress_test_transfers_count
+      1..@transfers_count
       |> Enum.chunk_every(pool_size)
       |> Enum.each(fn group ->
         Enum.map(group, fn _ ->
@@ -135,19 +135,19 @@ defmodule ExDoubleEntry.TransferStressTest do
 
       assert Decimal.equal?(
                checking_account_balance_amount,
-               Decimal.new(@stress_test_transfers_count)
+               Decimal.new(@transfers_count)
              )
 
       lines = ExDoubleEntry.repo().all(Line)
 
-      assert Enum.to_list(0..(@stress_test_transfers_count - 1)) ==
+      assert Enum.to_list(0..(@transfers_count - 1)) ==
                lines
                |> Stream.filter(&(&1.account_balance_id == credit_account_balance_id))
                |> Stream.map(& &1.balance_amount)
                |> Stream.map(&Decimal.to_integer/1)
                |> Enum.sort()
 
-      assert Enum.to_list(1..@stress_test_transfers_count) ==
+      assert Enum.to_list(1..@transfers_count) ==
                lines
                |> Stream.filter(&(&1.account_balance_id == checking_account_balance_id))
                |> Stream.map(& &1.balance_amount)

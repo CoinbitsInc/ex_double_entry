@@ -4,12 +4,12 @@ require Logger
 
 ExUnit.start(timeout: 300_000)
 
-if System.get_env("MIX_ENV") == "test_ex_money_stress" do
+if System.get_env("MIX_ENV") == "test_ex_money_concurrent_db_pool" do
   Logger.info("Repository is not running in a sandbox mode...")
-  ExUnit.configure(exclude: [stress_test: false])
+  ExUnit.configure(exclude: [concurrent_db_pool: false])
 else
   Ecto.Adapters.SQL.Sandbox.mode(ExDoubleEntry.repo(), :manual)
-  ExUnit.configure(exclude: [stress_test: true])
+  ExUnit.configure(exclude: [concurrent_db_pool: true])
 end
 
 db = Application.fetch_env!(:ex_double_entry, :db)
