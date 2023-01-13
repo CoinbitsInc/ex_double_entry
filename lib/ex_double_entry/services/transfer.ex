@@ -52,8 +52,8 @@ defmodule ExDoubleEntry.Transfer do
   defp do_perform(transfer, accounts, ensure_accounts: ensure_accounts) when is_list(accounts) do
     transfer = ensure_accounts_if_needed!(ensure_accounts, transfer, accounts)
 
-    with {:ok, _} <- Guard.positive_balance_if_enforced?(transfer),
-         {:ok, _} <- Guard.idempotent_if_provided?(transfer) do
+    with {:ok, _} <- Guard.idempotent_if_provided?(transfer),
+         {:ok, _} <- Guard.positive_balance_if_enforced?(transfer) do
       line1 =
         Line.insert!(MoneyProxy.neg(transfer.money),
           account: transfer.from,

@@ -65,6 +65,6 @@ jobs:
         restore-keys: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-dialyzer-
     - name: Create PLTs
       if: steps.dialyzer_plt_cache.outputs.cache-hit != 'true'
-      run: mkdir _build/dialyzer && mix dialyzer --plt
+      run: mkdir -p _build/dialyzer && mix dialyzer --plt
     - name: Run Dialyzer
       run: mix dialyzer
