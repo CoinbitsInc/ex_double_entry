@@ -1,4 +1,4 @@
-if Code.ensure_loaded?(Cldr) do
+if "#{Mix.env()}" =~ "test" and Code.ensure_loaded?(Cldr) do
   defmodule ExDoubleEntry.Cldr do
     use Cldr,
       locales: ["en"],
